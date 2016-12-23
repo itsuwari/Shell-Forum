@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 								//'Salt' => $NewSalt,
 								'Password' => $NewPasswordHash
 							))) {
-								$TemporaryUserExpirationTime = 30 * 86400 + $TimeStamp;//默认保持30天登陆状态
+								$TemporaryUserExpirationTime = 180 * 86400 + $TimeStamp;//默认保持30天登陆状态
 								SetCookies(array(
 									'UserExpirationTime' => $TemporaryUserExpirationTime,
 									'UserCode' => md5($NewPasswordHash . $NewSalt . $TemporaryUserExpirationTime . SALT)

@@ -1,12 +1,12 @@
 <?php
 set_time_limit(0);
-date_default_timezone_set('Asia/Shanghai'); //设置中国时区
+date_default_timezone_set('Asia/Shanghai'); //Time zone set to PRC.
 $Message = '';
 $Version = '5.8.0';
 define('DATABASE_PREFIX', 'carbon_');
 
 if (is_file('update.lock')) {
-	die("请删除 update/update.lock 文件后再进行操作！<br>Please Remove update/update.lock before update!");
+	die("Please Remove update/update.lock before update!");
 }
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	$Language       = $_POST['Language'];

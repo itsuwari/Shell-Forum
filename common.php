@@ -12,7 +12,7 @@
  * A high performance open-source forum software written in PHP. 
  */
 /*
-逐渐替换为帕斯卡命名法
+Use Pascal case.
 数据库从设计上避免使用Join多表联查
 */
 define('CARBON_FORUM_VERSION', '5.8.0');
@@ -29,7 +29,7 @@ if ((include __DIR__ . '/config.php') != 1) {
 require(LanguagePath . 'common.php');
 //Initialize PHP Data Object(Database)
 require(LibraryPath . 'PDO.class.php');
-$DB     = new Db(DBHost, DBPort, DBName, DBUser, DBPassword);
+$DB = new Db(DBHost, DBPort, DBName, DBUser, DBPassword);
 //Initialize MemCache(d) / Redis
 $MCache = false;
 if (EnableMemcache) {
@@ -74,15 +74,15 @@ if (!$Config) {
 		$MCache->set(MemCachePrefix . 'Config', $Config, 86400);
 	}
 }
-// 热门标签列表
+// Get hot tags
 $HotTagsArray = json_decode($Config['CacheHotTags'], true);
 $HotTagsArray = $HotTagsArray ? $HotTagsArray : array();
 
-$PHPSelf     = addslashes(htmlspecialchars($_SERVER['PHP_SELF'] ? $_SERVER['PHP_SELF'] : $_SERVER['SCRIPT_NAME']));
+$PHPSelf = addslashes(htmlspecialchars($_SERVER['PHP_SELF'] ? $_SERVER['PHP_SELF'] : $_SERVER['SCRIPT_NAME']));
 $UrlPath = '';
 //For IIS ISAPI_Rewrite
-$RequestURI  = str_ireplace('?' . (isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : ''), '', (isset($_SERVER['HTTP_X_REWRITE_URL']) ? $_SERVER['HTTP_X_REWRITE_URL'] : $_SERVER['REQUEST_URI']));
-$IsAjax      = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+$RequestURI = str_ireplace('?' . (isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : ''), '', (isset($_SERVER['HTTP_X_REWRITE_URL']) ? $_SERVER['HTTP_X_REWRITE_URL'] : $_SERVER['REQUEST_URI']));
+$IsAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
 $CurProtocol = IsSSL() ? 'https://' : 'http://';
 
 $_HEAD = array();
@@ -90,18 +90,21 @@ $_PUT = array();
 $_DELETE = array();
 $_OPTIONS = array();
 
+/*
+ * We will use PHP >= 7.0
 //消除低版本中魔术引号的影响
 if (version_compare(PHP_VERSION, '5.4.0') < 0 && get_magic_quotes_gpc()) {
 	function StripslashesDeep($var)
 	{
 		return is_array($var) ? array_map('StripslashesDeep', $var) : stripslashes($var);
 	}
-	$_GET     = StripslashesDeep($_GET);
-	$_POST    = StripslashesDeep($_POST);
-	$_COOKIE  = StripslashesDeep($_COOKIE);
+
+	$_GET = StripslashesDeep($_GET);
+	$_POST = StripslashesDeep($_POST);
+	$_COOKIE = StripslashesDeep($_COOKIE);
 	$_REQUEST = StripslashesDeep($_REQUEST);
 }
-
+*/
 
 // At某人并提醒他，使用时常在其前后加空格或回车，如 “@admin ”
 function AddingNotifications($Content, $TopicID, $PostID, $FilterUser = '')
@@ -196,6 +199,8 @@ function AlertMsg($PageTitle, $Error, $StatusCode = 200)
 //获取数组中的某一列
 function ArrayColumn($Input, $ColumnKey)
 {
+	/*
+	 * We will use PHP >= 7.0
 	if (version_compare(PHP_VERSION, '5.5.0') < 0) {
 		$Result = array();
 		if ($Input) {
@@ -207,10 +212,12 @@ function ArrayColumn($Input, $ColumnKey)
 	} else {
 		return array_column($Input, $ColumnKey);
 	}
+	*/
+	return array_column($Input, $ColumnKey);
 }
 
 
-//鉴权
+// Permission check.
 function Auth($MinRoleRequire, $AuthorizedUserID = 0, $StatusRequire = false)
 {
 	global $CurUserRole, $CurUserID, $CurUserInfo, $Lang, $RequestURI;
@@ -247,11 +254,11 @@ function CharsFilter($String)
 }
 
 
-// 获得IP地址
+// Get IP address
 function CurIP()
 {
 	$IsCDN = false; //未使用CDN时，应直接使用 $_SERVER['REMOTE_ADDR'] 以防止客户端伪造IP
-	$IP    = false;
+	$IP = false;
 	if (!empty($_SERVER["HTTP_CLIENT_IP"])) {
 		$IP = trim($_SERVER["HTTP_CLIENT_IP"]);
 	}
@@ -267,7 +274,7 @@ function CurIP()
 			Fails validation for the following private IPv4 ranges: 10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16.
 			Fails validation for the IPv6 addresses starting with FD or FC.
 			*/
-			if (filter_var($Value, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE)){
+			if (filter_var($Value, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE)) {
 				$IP = $Value;
 				break;
 			}
@@ -281,8 +288,8 @@ function CurIP()
 function Filter($Content)
 {
 	$FilteringWords = require(LibraryPath . "Filtering.words.config.php");
-	$Prohibited     = false;
-	$GagTime        = 0;
+	$Prohibited = false;
+	$GagTime = 0;
 	foreach ($FilteringWords as $SearchRegEx => $Rule) {
 
 		if (preg_match_all("/" . $SearchRegEx . "/i", $Content, $SearchWordsList)) {
@@ -342,7 +349,7 @@ function FormatTime($UnixTimeStamp)
 	global $Lang;
 	$Seconds = $_SERVER['REQUEST_TIME'] - $UnixTimeStamp;
 	if ($Seconds < 2592000) {
-		// 小于30天如下显示
+		// Less than 30 days.
 		if ($Seconds >= 86400) {
 			return round($Seconds / 86400, 0) . '&nbsp;' . $Lang['Time_Days_Ago'];
 		} else if ($Seconds >= 3600) {
@@ -355,14 +362,14 @@ function FormatTime($UnixTimeStamp)
 			return ($Seconds + 1) . '&nbsp;' . $Lang['Time_Seconds_Ago'];
 		}
 	} else {
-		// 大于一月
+		// Longer than 1 month ago.
 		return date("Y-m-d", $UnixTimeStamp);
-		//gmdate()可以返回格林威治标准时，date()则为当地时
+		//gmdate() Use date() to get local time.
 	}
 }
 
 
-//获取头像
+// Get avatar
 function GetAvatar($UserID, $UserName, $Size = 'middle')
 {
 	global $Config;
@@ -370,7 +377,7 @@ function GetAvatar($UserID, $UserName, $Size = 'middle')
 }
 
 
-//获取Tag标签
+// Get tag icon
 function GetTagIcon($TagID, $Icon, $TagName, $Size = 'middle')
 {
 	global $Config;
@@ -400,24 +407,32 @@ function GetCookie($Key, $DefaultValue = false)
 //Hash值校验，防止时序攻击法
 function HashEquals($KnownString, $UserString)
 {
+	/*
+	 * We will use PHP >= 7.0
 	if (version_compare(PHP_VERSION, '5.6.0') < 0) {
 		return ($KnownString === $UserString);
 	} else {
 		return hash_equals($KnownString, $UserString);
 	}
+	*/
+	return hash_equals($KnownString, $UserString);
 }
 
-//长整数intval，防止溢出，目前暂未用到
+// 长整数intval，防止溢出，目前暂未用到
 function Int($s)
 {
 	return ($a = preg_replace('/[^\-\d]*(\-?\d*).*/', '$1', $s)) ? $a : '0';
 }
 
 
-//判断是否为邮件地址
+// Validate email address.
 function IsEmail($email)
 {
+	/*
+	 * Use new method, need PHP >= 5.2.0
 	return strlen($email) > 6 && preg_match("/^[\w\-\.]+@[\w\-\.]+(\.\w+)+$/", $email);
+	*/
+	filter_var($email, FILTER_VALIDATE_EMAIL);
 }
 
 
@@ -476,7 +491,7 @@ function Pagination($PageUrl, $CurrentPage, $TotalPage)
 	if ($TotalPage <= 1)
 		return false;
 	global $Config, $Lang;
-	$PageUrl  = $Config['WebsitePath'] . $PageUrl;
+	$PageUrl = $Config['WebsitePath'] . $PageUrl;
 	$PageLast = $CurrentPage - 1;
 	$PageNext = $CurrentPage + 1;
 	//echo '<span id="pagenum"><span class="currentpage">' . $CurrentPage . '/' . $TotalPage . '</span>';
@@ -489,7 +504,7 @@ function Pagination($PageUrl, $CurrentPage, $TotalPage)
 	} else {
 		$PageiStart = $CurrentPage - 3;
 	}
-	
+
 	if ($CurrentPage + 3 >= $TotalPage) {
 		$PageiEnd = $TotalPage;
 	} else if ($CurrentPage <= 3 && $TotalPage >= 8) {
@@ -573,7 +588,7 @@ function SetStyle($PathName, $StyleName)
 		header('Content-Type: application/json; charset=utf-8');
 	}
 	$TemplatePath = __DIR__ . '/view/' . $PathName . '/template/';
-	$Style        = $StyleName;
+	$Style = $StyleName;
 }
 
 
@@ -626,7 +641,7 @@ function UpdateConfig($NewConfig)
 	} else {
 		return false;
 	}
-	
+
 }
 
 
@@ -643,7 +658,7 @@ function UpdateUserInfo($NewUserInfo, $UserID = 0)
 			$StringBindParam .= $Key . ' = :' . $Key . ',';
 		}
 		$StringBindParam = substr($StringBindParam, 0, -1);
-		$Result          = $DB->query('UPDATE `' . PREFIX . 'users` SET ' . $StringBindParam . ' WHERE ID = :UserID', array_merge($NewUserInfo, array(
+		$Result = $DB->query('UPDATE `' . PREFIX . 'users` SET ' . $StringBindParam . ' WHERE ID = :UserID', array_merge($NewUserInfo, array(
 			'UserID' => $UserID
 		)));
 		if ($MCache) {
@@ -655,29 +670,29 @@ function UpdateUserInfo($NewUserInfo, $UserID = 0)
 	} else {
 		return false;
 	}
-	
+
 }
 
 //跨站脚本白名单过滤
 function XssEscape($html)
 {
 	preg_match_all("/\<([^\<]+)\>/is", $html, $ms);
-	
-	$searchs[]  = '<';
+
+	$searchs[] = '<';
 	$replaces[] = '&lt;';
-	$searchs[]  = '>';
+	$searchs[] = '>';
 	$replaces[] = '&gt;';
-	
+
 	if ($ms[1]) {
 		$allowtags = 'img|a|font|div|table|tbody|caption|tr|td|th|br|br\/|p|b|strong|i|u|em|span|ol|ul|li|blockquote|object|param|embed|pre|hr|h1|h2|h3|h4|h5|h6|video|source|audio';
-		$ms[1]     = array_unique($ms[1]);
+		$ms[1] = array_unique($ms[1]);
 		foreach ($ms[1] as $value) {
 			$searchs[] = "&lt;" . $value . "&gt;";
-			
-			$value    = str_replace('&', '_uch_tmp_str_', $value);
-			$value    = dhtmlspecialchars($value);
-			$value    = str_replace('_uch_tmp_str_', '&', $value);
-			$value    = str_replace(array(
+
+			$value = str_replace('&', '_uch_tmp_str_', $value);
+			$value = dhtmlspecialchars($value);
+			$value = str_replace('_uch_tmp_str_', '&', $value);
+			$value = str_replace(array(
 				'\\',
 				'/*'
 			), array(
@@ -770,8 +785,8 @@ function XssEscape($html)
 				'expression',
 				'data'
 			); //style, class
-			$skipstr  = implode('|', $skipkeys);
-			$value    = preg_replace(array(
+			$skipstr = implode('|', $skipkeys);
+			$value = preg_replace(array(
 				"/($skipstr)/i"
 			), '.', $value);
 			if (!preg_match("/^[\/|\s]?($allowtags)(\s+|$)/is", $value)) {
@@ -840,30 +855,30 @@ $IsApp = $_SERVER['HTTP_HOST'] == $Config['AppDomainName'] ? true : false;
  */
 if ($IsApp) {
 	$TemplatePath = __DIR__ . '/view/api/template/';
-	$Style        = 'API';
+	$Style = 'API';
 	header('Access-Control-Allow-Origin: *');
 	header('Content-Type: application/json');
 	//API鉴权
-	$SignatureKey   = Request("Request", "SKey");
+	$SignatureKey = Request("Request", "SKey");
 	$SignatureValue = Request("Request", "SValue");
-	$SignatureTime  = intval(Request("Request", "STime"));
+	$SignatureTime = intval(Request("Request", "STime"));
 	if (!$SignatureTime || !$SignatureKey || !$SignatureValue || empty($APISignature[$SignatureKey]) || abs($SignatureTime - $TimeStamp) > 600 || !HashEquals($SignatureValue, md5($SignatureKey . $APISignature[$SignatureKey] . $SignatureTime))) {
 		AlertMsg('403', 'Forbidden', 403);
 	}
 } elseif ($_SERVER['HTTP_HOST'] == $Config['MobileDomainName'] || (!$Config['MobileDomainName'] && $IsMobile)) {
 	$TemplatePath = __DIR__ . '/view/mobile/template/';
-	$Style        = 'Mobile';
+	$Style = 'Mobile';
 	header('X-Frame-Options: SAMEORIGIN');
 } else {
 	$TemplatePath = __DIR__ . '/view/default/template/';
-	$Style        = 'Default';
+	$Style = 'Default';
 	header('X-Frame-Options: SAMEORIGIN');
 	//header('X-XSS-Protection: 1; mode=block');
 	//X-XSS-Protection may cause some issues in dashboard
 }
 
 $CurView = GetCookie('View', $IsMobile ? 'mobile' : 'desktop');
-$CurIP    = CurIP();
+$CurIP = CurIP();
 $FormHash = FormHash();
 // 限制不能打开.php的网址
 if (strpos($RequestURI, '.php')) {
@@ -908,11 +923,11 @@ if ($Config['DaysDate'] != $CurrentDate) {
 	));
 }
 // Get the infomation of current user
-$CurUserInfo           = null; //当前用户信息，Array，以后判断是否登陆使用if($CurUserID)
-$CurUserRole           = 0;
-$CurUserID             = intval(GetCookie('UserID'));
+$CurUserInfo = null; //当前用户信息，Array，以后判断是否登陆使用if($CurUserID)
+$CurUserRole = 0;
+$CurUserID = intval(GetCookie('UserID'));
 $CurUserExpirationTime = intval(GetCookie('UserExpirationTime'));
-$CurUserCode           = GetCookie('UserCode');
+$CurUserCode = GetCookie('UserCode');
 
 if ($CurUserExpirationTime > $TimeStamp && $CurUserExpirationTime < ($TimeStamp + 2678400) && $CurUserID && $CurUserCode) {
 	$TempUserInfo = array();
@@ -923,7 +938,7 @@ if ($CurUserExpirationTime > $TimeStamp && $CurUserExpirationTime < ($TimeStamp 
 		$TempUserInfo = $DB->row("SELECT * FROM " . PREFIX . "users WHERE ID = :UserID", array(
 			"UserID" => $CurUserID
 		));
-		
+
 		if ($MCache && $TempUserInfo) {
 			$MCache->set(MemCachePrefix . 'UserInfo_' . $CurUserID, $TempUserInfo, 86400);
 		}

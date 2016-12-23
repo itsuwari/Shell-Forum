@@ -6,7 +6,7 @@ $Keyword      = Request('Get', 'keyword');
 $KeywordArray = array_unique(explode(" ", $Keyword));
 $Error        = '';
 
-$PostsSearch = false;//是否启用帖子搜索
+$PostsSearch = false; //是否启用帖子搜索
 $PostsSearchOffset = array_search('post:true', $KeywordArray);
 if ($PostsSearchOffset !== false) {
 	$PostsSearch = true;

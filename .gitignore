@@ -35,3 +35,5 @@
 #These files will be created automatically after install
 /.htaccess
 /config.php
+#Test files.
+*.yml
