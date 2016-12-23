@@ -37,3 +37,4 @@
 /config.php
 #Test files.
 *.yml
+/.idea
